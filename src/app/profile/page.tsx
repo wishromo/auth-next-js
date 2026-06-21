@@ -82,7 +82,7 @@ export default function ProfilePage() {
               <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <h2 className="break-words text-amber-400 font-semibold">
+            <h2 className="wrap-break-word text-amber-400 font-semibold">
               <Link
                 href={`/profile/${data}`}
                 className="hover:underline"
