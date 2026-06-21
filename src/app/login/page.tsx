@@ -26,10 +26,14 @@ export default function LoginPage() {
             console.log("Login Success:", response.data);
             toast.success("Login Successful");
 
+            // redirect after login
             router.push("/profile");
-        } catch (error) {
+
+        } catch (error: any) {
             console.log("Login Failed:", error);
-            toast.error("Login Failed");
+            toast.error(
+                error.response?.data?.error || "Login Failed"
+            );
         } finally {
             setLoading(false);
         }
@@ -50,84 +54,78 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4">
+        <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white p-4">
             <div className="w-full max-w-sm border border-slate-700 rounded-xl p-6 bg-slate-800/50 backdrop-blur-sm shadow-xl flex flex-col gap-4">
-                <h1 className="text-3xl font-bold text-center text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]">
+
+                {/* TITLE */}
+                <h1 className="text-3xl font-bold text-center text-amber-400">
                     {loading ? "Processing..." : "Login"}
                 </h1>
 
                 <hr className="border-slate-700" />
 
+                {/* EMAIL */}
                 <div className="flex flex-col gap-1">
-                    <label
-                        htmlFor="email"
-                        className="text-sm font-medium text-slate-300"
-                    >
-                        Email
-                    </label>
-
+                    <label className="text-sm text-slate-300">Email</label>
                     <input
-                        id="email"
                         type="email"
-                        placeholder="Enter your email"
                         value={user.email}
                         onChange={(e) =>
-                            setUser((prev) => ({
-                                ...prev,
-                                email: e.target.value,
-                            }))
+                            setUser({ ...user, email: e.target.value })
                         }
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 focus:border-amber-400 outline-none text-white transition duration-150"
+                        placeholder="Enter email"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white"
                     />
                 </div>
 
+                {/* PASSWORD */}
                 <div className="flex flex-col gap-1">
-                    <label
-                        htmlFor="password"
-                        className="text-sm font-medium text-slate-300"
-                    >
-                        Password
-                    </label>
-
+                    <label className="text-sm text-slate-300">Password</label>
                     <input
-                        id="password"
                         type="password"
-                        placeholder="Enter your password"
                         value={user.password}
                         onChange={(e) =>
-                            setUser((prev) => ({
-                                ...prev,
-                                password: e.target.value,
-                            }))
+                            setUser({ ...user, password: e.target.value })
                         }
                         onKeyDown={handleKeyDown}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 focus:border-amber-400 outline-none text-white transition duration-150"
+                        placeholder="Enter password"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white"
                     />
+
+                    {/* FORGOT PASSWORD */}
+                    <div className="text-right text-sm mt-1">
+                        <Link
+                            href="/forgotpassword"
+                            className="text-amber-400 hover:underline"
+                        >
+                            Forgot Password?
+                        </Link>
+                    </div>
                 </div>
 
+                {/* LOGIN BUTTON */}
                 <button
                     onClick={onLogin}
                     disabled={buttonDisabled || loading}
-                    className="mt-2 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:bg-amber-800 disabled:opacity-50 text-slate-950 font-bold transition duration-150 shadow-md"
+                    className="w-full py-2 rounded-lg bg-amber-500 text-black font-bold disabled:opacity-50"
                 >
-                    {buttonDisabled
+                    {loading
+                        ? "Logging in..."
+                        : buttonDisabled
                         ? "Fill All Fields"
-                        : loading
-                        ? "Logging In..."
                         : "Login"}
                 </button>
 
-                <p className="text-sm text-center text-slate-400 mt-2">
+                {/* SIGNUP LINK */}
+                <p className="text-sm text-center text-slate-400">
                     Don't have an account?{" "}
-                    <Link
-                        href="/signup"
-                        className="text-amber-400 hover:underline transition duration-150"
-                    >
-                        Sign Up Here
+                    <Link href="/signup" className="text-amber-400">
+                        Sign Up
                     </Link>
                 </p>
+
             </div>
         </div>
     );
-} 
+}

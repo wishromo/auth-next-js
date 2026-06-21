@@ -13,6 +13,6 @@ export async function connect() {
         });
 
     } catch (error) {
-        console.log("Something went wrong!", error);
+        console.log("Mongo Error!", error);
     }
 }
