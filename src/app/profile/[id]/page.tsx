@@ -1,27 +1,32 @@
 "use client";
 
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 
 export default function UserProfile() {
     const router = useRouter();
-
-    // ✅ Correct way to get dynamic route params in client component
     const params = useParams();
+
     const id = params?.id as string;
+
+    const [loading, setLoading] = useState(false);
 
     const logout = async () => {
         try {
+            setLoading(true);
+
             await axios.get("/api/users/logout");
+
             toast.success("Logout successful");
 
-            // redirect to login page after logout
             router.push("/login");
         } catch (error: any) {
             console.log(error.message);
             toast.error("Logout failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -31,7 +36,10 @@ export default function UserProfile() {
             <div className="w-full max-w-md border border-slate-700 rounded-xl p-6 bg-slate-800/50 backdrop-blur-sm shadow-xl">
 
                 {/* Title */}
-                <h1 className="text-3xl font-bold text-center text-amber-400">
+                <h1 className="text-3xl font-bold text-center text-amber-400 flex items-center justify-center gap-2">
+                    {loading && (
+                        <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                    )}
                     Profile
                 </h1>
 
@@ -51,9 +59,14 @@ export default function UserProfile() {
                 {/* Logout Button */}
                 <button
                     onClick={logout}
-                    className="w-full mt-6 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition duration-150 shadow-md"
+                    disabled={loading}
+                    className="w-full mt-6 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition duration-150 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                    Logout
+                    {loading && (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    )}
+
+                    {loading ? "Logging out..." : "Logout"}
                 </button>
 
             </div>

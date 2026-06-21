@@ -47,7 +47,11 @@ export default function VerifyEmailPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4">
       <div className="w-full max-w-md border border-slate-700 rounded-xl p-6 bg-slate-800/50 backdrop-blur-sm shadow-xl text-center">
-        <h1 className="text-3xl font-bold text-amber-400">
+
+        <h1 className="text-3xl font-bold text-amber-400 flex items-center justify-center gap-2">
+          {loading && (
+            <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+          )}
           Verify Email
         </h1>
 
@@ -62,17 +66,22 @@ export default function VerifyEmailPage() {
         {!verified && (
           <>
             <input
-              className="w-full mt-4 p-2 rounded bg-slate-700 text-white outline-none"
+              className="w-full mt-4 p-2 rounded bg-slate-700 text-white outline-none border border-slate-600"
               placeholder="Enter token..."
               value={token}
               onChange={(e) => setToken(e.target.value)}
+              disabled={loading}
             />
 
             <button
               onClick={verifyUserEmail}
               disabled={loading || !token}
-              className="w-full mt-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded disabled:opacity-50"
+              className="w-full mt-4 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded disabled:opacity-50 flex items-center justify-center gap-2"
             >
+              {loading && (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+              )}
+
               {loading ? "Verifying..." : "Verify"}
             </button>
           </>
@@ -84,7 +93,10 @@ export default function VerifyEmailPage() {
               Email verified successfully ✔
             </p>
 
-            <Link href="/login" className="text-blue-400 mt-4 block hover:underline">
+            <Link
+              href="/login"
+              className="text-blue-400 mt-4 block hover:underline"
+            >
               Go to Login
             </Link>
           </>

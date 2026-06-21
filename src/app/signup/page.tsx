@@ -61,7 +61,11 @@ export default function SignupPage() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white p-4">
             <div className="w-full max-w-sm border border-slate-700 rounded-xl p-6 bg-slate-800/50 backdrop-blur-sm shadow-xl flex flex-col gap-4">
-                <h1 className="text-3xl font-bold text-center text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]">
+
+                <h1 className="text-3xl font-bold text-center text-amber-400 drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)] flex items-center justify-center gap-2">
+                    {loading && (
+                        <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                    )}
                     {loading ? "Processing..." : "Sign Up"}
                 </h1>
 
@@ -78,6 +82,7 @@ export default function SignupPage() {
                         value={user.username}
                         onChange={(e) => setUser({ ...user, username: e.target.value })}
                         placeholder="Enter username"
+                        disabled={loading}
                     />
                 </div>
 
@@ -92,6 +97,7 @@ export default function SignupPage() {
                         value={user.email}
                         onChange={(e) => setUser({ ...user, email: e.target.value })}
                         placeholder="Enter email"
+                        disabled={loading}
                     />
                 </div>
 
@@ -106,15 +112,24 @@ export default function SignupPage() {
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
                         placeholder="Enter password"
+                        disabled={loading}
                     />
                 </div>
 
                 <button
                     onClick={onSignup}
                     disabled={buttonDisabled || loading}
-                    className="mt-2 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:bg-amber-800 disabled:opacity-50 text-slate-950 font-bold transition duration-150 shadow-md"
+                    className="mt-2 w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:bg-amber-800 disabled:opacity-50 text-slate-950 font-bold transition duration-150 shadow-md flex items-center justify-center gap-2"
                 >
-                    {loading ? "Processing..." : buttonDisabled ? "Fill All Fields" : "Register"}
+                    {loading && (
+                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    )}
+
+                    {loading
+                        ? "Processing..."
+                        : buttonDisabled
+                        ? "Fill All Fields"
+                        : "Register"}
                 </button>
 
                 <p className="text-sm text-center text-slate-400 mt-2">
