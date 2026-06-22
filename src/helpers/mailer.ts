@@ -50,20 +50,15 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
 
         console.log("✅ Mailtrap connected successfully");
 
-        // DEBUG LOGS
-        console.log("================================");
-        console.log("EMAIL TYPE:", emailType);
-        console.log("DOMAIN:", process.env.DOMAIN);
-        console.log("VERCEL_URL:", process.env.VERCEL_URL);
-        console.log("================================");
+        // const verificationLink =
+        //     `${process.env.DOMAIN}/verifyemail?token=${hashedToken}`;
 
+        // console.log("Verification Link:", verificationLink);
         const verificationLink =
-            emailType === "VERIFY"
-                ? `${process.env.DOMAIN}/verifyemail?token=${encodeURIComponent(hashedToken)}`
-                : `${process.env.DOMAIN}/resetpassword?token=${encodeURIComponent(hashedToken)}`;
-
-        console.log("Verification Link:", verificationLink);
-
+        emailType === "VERIFY"
+          ? `${process.env.DOMAIN}/verifyemail?token=${encodeURIComponent(hashedToken)}`
+          : `${process.env.DOMAIN}/resetpassword?token=${encodeURIComponent(hashedToken)}`;
+            console.log("Verification Link:", verificationLink);
         const mailOptions = {
             from: process.env.MAILTRAP_SENDER || "noreply@example.com",
             to: email,
@@ -106,3 +101,80 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
         throw new Error(error.message);
     }
 };
+// const nodemailer = require("nodemailer");
+
+// import User from "@/models/userModel";
+// import bcryptjs from "bcryptjs";
+
+// export const sendEmail = async ({ email, emailType, userId }: any) => {
+//     try {
+//         console.log("========== EMAIL PROCESS STARTED ==========");
+//         console.log("Email:", email);
+//         console.log("Email Type:", emailType);
+//         console.log("User ID:", userId);
+//         console.log("DOMAIN =", process.env.DOMAIN);
+
+//         const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+
+//         console.log("Generated Token:", hashedToken);
+
+//         if (emailType === "VERIFY") {
+//             await User.findByIdAndUpdate(userId, {
+//                 verifyToken: hashedToken,
+//                 verifyTokenExpiry: Date.now() + 3600000,
+//             });
+//         } else if (emailType === "RESET") {
+//             await User.findByIdAndUpdate(userId, {
+//                 forgotPasswordToken: hashedToken,
+//                 forgotPasswordTokenExpiry: Date.now() + 3600000,
+//             });
+//         }
+
+//         const transport = nodemailer.createTransport({
+//             host: "sandbox.smtp.mailtrap.io",
+//             port: 2525,
+//             auth: {
+//                 user: process.env.MAILTRAP_USER!,
+//                 pass: process.env.MAILTRAP_PASS!,
+//             },
+//         });
+
+//         await transport.verify();
+
+//         const verificationLink =
+//             emailType === "VERIFY"
+//                 ? `${process.env.DOMAIN}/verifyemail?token=${encodeURIComponent(hashedToken)}`
+//                 : `${process.env.DOMAIN}/resetpassword?token=${encodeURIComponent(hashedToken)}`;
+
+//         console.log("Email Link:", verificationLink);
+
+//         const mailOptions = {
+//             from: process.env.MAILTRAP_SENDER || "noreply@example.com",
+//             to: email,
+//             subject:
+//                 emailType === "VERIFY"
+//                     ? "Verify your email"
+//                     : "Reset your password",
+//             html: `
+//                 <p>Click <a href="${verificationLink}">here</a>
+//                 to ${
+//                     emailType === "VERIFY"
+//                         ? "verify your email"
+//                         : "reset your password"
+//                 }</p>
+
+//                 <p>Or copy this link:</p>
+//                 <p>${verificationLink}</p>
+//             `,
+//         };
+
+//         const mailResponse = await transport.sendMail(mailOptions);
+
+//         console.log("Email sent:", mailResponse.messageId);
+
+//         return mailResponse;
+//     } catch (error: any) {
+//         console.log("EMAIL ERROR:", error.message);
+//         throw new Error(error.message);
+//     }
+// };
