@@ -1,96 +1,62 @@
-"use client";
+import { connect } from "@/dbconfig/dbconfig";
+import User from "@/models/userModel";
+import bcryptjs from "bcryptjs";
+import { NextRequest, NextResponse } from "next/server";
 
-import axios from "axios";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+connect();
 
-export default function ResetPasswordPage() {
-    const [token, setToken] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+export async function POST(request: NextRequest) {
+    try {
+        const { token, password } = await request.json();
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlToken = params.get("token");
+        console.log("========== RESET PASSWORD STARTED ==========");
+        console.log("TOKEN FROM FRONTEND:", token);
+        console.log("PASSWORD RECEIVED:", password ? "YES" : "NO");
 
-        if (urlToken) {
-            setToken(urlToken);
+        if (!token || !password) {
+            return NextResponse.json(
+                { error: "Token and password are required" },
+                { status: 400 }
+            );
         }
-    }, []);
 
-    const resetPassword = async () => {
-        try {
-            setLoading(true);
+        const user = await User.findOne({
+            forgotPasswordToken: token,
+            forgotPasswordTokenExpiry: { $gt: Date.now() },
+        });
 
-            const response = await axios.post("/api/users/resetpassword", {
-                token,
-                password,
-            });
+        console.log("USER FOUND:", user ? "YES" : "NO");
 
-            toast.success(response.data.message);
-            setSuccess(true);
-        } catch (error: any) {
-            console.log(error);
-            toast.error(error.response?.data?.error || "Something went wrong");
-        } finally {
-            setLoading(false);
+        if (!user) {
+            return NextResponse.json(
+                { error: "Invalid or expired token" },
+                { status: 400 }
+            );
         }
-    };
 
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-slate-900 text-white p-4">
-            <div className="w-full max-w-md border border-slate-700 rounded-xl p-6 bg-slate-800 shadow-xl">
-                <h1 className="text-3xl font-bold text-center text-amber-400 flex items-center justify-center gap-2">
-                    {loading && (
-                        <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                    )}
-                    Reset Password
-                </h1>
+        const salt = await bcryptjs.genSalt(10);
+        const hashedPassword = await bcryptjs.hash(password, salt);
 
-                <p className="text-center text-slate-300 mt-2">
-                    Enter your new password
-                </p>
+        user.password = hashedPassword;
 
-                <input
-                    type="password"
-                    placeholder="New Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading || success}
-                    className="w-full mt-6 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white disabled:opacity-50"
-                />
+        user.forgotPasswordToken = undefined;
+        user.forgotPasswordTokenExpiry = undefined;
 
-                {!success && (
-                    <button
-                        onClick={resetPassword}
-                        disabled={!password || loading || !token}
-                        className="w-full mt-4 py-2 rounded-lg bg-amber-500 text-black font-bold disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        {loading && (
-                            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        )}
+        await user.save();
 
-                        {loading ? "Updating..." : "Reset Password"}
-                    </button>
-                )}
+        console.log("PASSWORD RESET SUCCESSFUL");
+        console.log("========== RESET PASSWORD COMPLETED ==========");
 
-                {success && (
-                    <div className="text-center mt-4">
-                        <p className="text-green-400 font-semibold">
-                            Password updated successfully ✔
-                        </p>
+        return NextResponse.json({
+            message: "Password reset successful",
+            success: true,
+        });
+    } catch (error: any) {
+        console.error("RESET PASSWORD ERROR:", error);
 
-                        <Link
-                            href="/login"
-                            className="text-blue-400 hover:underline block mt-2"
-                        >
-                            Go to Login
-                        </Link>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+        return NextResponse.json(
+            { error: error.message || "Server Error" },
+            { status: 500 }
+        );
+    }
 }
