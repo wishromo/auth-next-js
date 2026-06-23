@@ -1,3 +1,4 @@
+// import nodemailer from "nodemailer";
 const nodemailer = require("nodemailer");
 import User from "@/models/userModel";
 import bcryptjs from "bcryptjs";
@@ -10,6 +11,8 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
         console.log("User ID:", userId);
 
         const hashedToken = await bcryptjs.hash(userId.toString(), 10);
+
+        console.log("Generated Token:", hashedToken);
 
         if (emailType === "VERIFY") {
             await User.findByIdAndUpdate(userId, {
@@ -34,46 +37,48 @@ export const sendEmail = async ({ email, emailType, userId }: any) => {
 
         await transport.verify();
 
-        // Hard-coded Vercel URL for testing
-        const baseUrl =
-            "https://auth-next-js-c7z6-juumjp05v-hinas-projects-aab95382.vercel.app";
+        const baseUrl = process.env.DOMAIN;
 
-        const link =
+        console.log("DOMAIN =", baseUrl);
+
+        if (!baseUrl) {
+            throw new Error("DOMAIN environment variable is missing");
+        }
+
+        const verificationLink =
             emailType === "VERIFY"
                 ? `${baseUrl}/verifyemail?token=${encodeURIComponent(hashedToken)}`
                 : `${baseUrl}/resetpassword?token=${encodeURIComponent(hashedToken)}`;
 
-        console.log("EMAIL LINK:", link);
+        console.log("Verification Link:", verificationLink);
 
         const mailOptions = {
-            from: "noreply@example.com",
+            from: process.env.MAILTRAP_SENDER || "noreply@example.com",
             to: email,
             subject:
                 emailType === "VERIFY"
                     ? "Verify your email"
                     : "Reset your password",
             html: `
-                <p>Click <a href="${link}">here</a> to ${
+                <p>Click <a href="${verificationLink}">here</a>
+                to ${
                     emailType === "VERIFY"
                         ? "verify your email"
                         : "reset your password"
                 }</p>
 
                 <p>Or copy this link:</p>
-                <p>${link}</p>
+                <p>${verificationLink}</p>
             `,
         };
 
         const mailResponse = await transport.sendMail(mailOptions);
 
         console.log("✅ Email sent successfully");
-        console.log("========== EMAIL PROCESS COMPLETED ==========");
-
         return mailResponse;
     } catch (error: any) {
         console.log("❌ EMAIL PROCESS FAILED");
-        console.log(error);
-
+        console.log("Error Message:", error.message);
         throw new Error(error.message);
     }
 };
